@@ -1,5 +1,8 @@
+import os
+from django.conf import settings
+from django.core.servers.basehttp import FileWrapper
 
-from django.http import Http404
+from django.http import Http404,HttpResponse
 from django.shortcuts import render, get_object_or_404
 # Create your views here.
 from django.views.generic.list import ListView
@@ -46,8 +49,37 @@ class ProductUpdateView(ProductManagerMixin, SubmitBtnMixin, MultiSlugMixin, Upd
 
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(MultiSlugMixin, DetailView):
 	model = Product
+
+
+class ProductDownloadView(MultiSlugMixin, DetailView):
+	model = Product
+
+	def get(self,request,*args,**kwargs):
+
+
+		obj = self.get_object()
+		filepath = os.path.join(settings.PROTECTED_ROOT,obj.media.path)
+		# suitable for larger files
+
+
+		# The method open has to used in Python 3 and 
+		# should have the following encoding to prevent error
+		# it is good to put it in a try block 
+		wrapper = FileWrapper(open(filepath,"r",encoding='utf-8', errors='ignore'))
+		response = HttpResponse ( wrapper , content_type = 'application/force-download')
+		response["Content-Disposition"] = "attachment; filename=%s" % (obj.media.name)
+		response["X-SendFile"] = str(obj.media.name)
+
+		# Override the response with custom parameter before return statement
+		return response
+
+
+
+
+
+
 
 
 class ProductListView(ListView):

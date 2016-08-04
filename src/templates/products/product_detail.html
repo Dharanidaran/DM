@@ -5,4 +5,11 @@
 <p>{{object.description}}</p>
 <p>{{object.price}}</p>
 
+
+{% if object.media %}
+<!-- class based method that will actually return a download link -->
+<p><a href="{{ object.get_download }} ">Download</a></p>
+
+
+{% endif %}
 {% endblock content %}
