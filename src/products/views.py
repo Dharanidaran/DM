@@ -3,25 +3,58 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 # Create your views here.
 from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView,UpdateView
 
 
-
+from django.core.urlresolvers import reverse
+from digitalmarket.mixins import LoginRequiredMixin,MultiSlugMixin,SubmitBtnMixin
+	
 from .forms import ProductAddForm, ProductModelForm
 from .models import Product
+from .mixins import ProductManagerMixin
+
+class ProductCreateView( LoginRequiredMixin, SubmitBtnMixin, CreateView):
+	model = Product
+	template_name = "form.html"
+	form_class = ProductModelForm
+	# success_url ="/products/"
+	submit_btn = "Add Product"
+
+	def form_valid(self,form):
+		user = self.request.user
+		form.instance.user = user
+		valid_data = super(ProductCreateView,self).form_valid(form)
+		# now the instance is saved to the database
+		# So we are ready to add the many-to-many field which depends on other models
+		form.instance.managers.add(user)
+		return valid_data
+
+	def get_success_url(self):
+		return reverse("product:list")
+
+
+
+# ProductManagerMixin takes care of LoginRequiredMixin	
+class ProductUpdateView(ProductManagerMixin, SubmitBtnMixin, MultiSlugMixin, UpdateView):
+	model = Product
+	template_name = "form.html"
+	form_class = ProductModelForm
+	#success_url ="/products/"
+	submit_btn = "Add Product"
+
+
+
+
+class ProductDetailView(DetailView):
+	model = Product
+
 
 class ProductListView(ListView):
 	model = Product 
-
-	# template_name ="list_view.html"
-	# def get_context_data(self,**kwargs):
-	# 	context = super(ProductListView,self).get_context_data(**kwargs)
-	# 	print(context)
-	# 	return context
-
-
 	def get_queryset(self,*args,**kwargs):
 		qs = super(ProductListView,self).get_queryset(**kwargs)
-		qs =qs.filter(description__icontains='Some')
+		qs =qs.filter(description__icontains='')
 		return qs
 
 
