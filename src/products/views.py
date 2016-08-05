@@ -1,55 +1,57 @@
 import os
-from mimetypes import guess_type
-from django.db.models import Q
 
+from mimetypes import guess_type
 
 from django.conf import settings
 from django.core.servers.basehttp import FileWrapper
-
-from django.http import Http404,HttpResponse
-from django.shortcuts import render, get_object_or_404
-# Create your views here.
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView,UpdateView
-
-
 from django.core.urlresolvers import reverse
-from digitalmarket.mixins import LoginRequiredMixin,MultiSlugMixin,SubmitBtnMixin
-	
-from .forms import ProductAddForm, ProductModelForm
-from .models import Product
-from .mixins import ProductManagerMixin
+from django.db.models import Q
+from django.http import Http404, HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.list import ListView
 
-class ProductCreateView( LoginRequiredMixin, SubmitBtnMixin, CreateView):
+# Create your views here.
+
+from digitalmarket.mixins import (
+			LoginRequiredMixin,
+			MultiSlugMixin, 
+			SubmitBtnMixin
+			)
+
+from .forms import ProductAddForm, ProductModelForm
+from .mixins import ProductManagerMixin
+from .models import Product
+
+
+
+
+class ProductCreateView(LoginRequiredMixin, SubmitBtnMixin, CreateView):
 	model = Product
 	template_name = "form.html"
 	form_class = ProductModelForm
-	# success_url ="/products/"
+	#success_url = "/products/"
 	submit_btn = "Add Product"
 
-	def form_valid(self,form):
+	def form_valid(self, form):
 		user = self.request.user
 		form.instance.user = user
-		valid_data = super(ProductCreateView,self).form_valid(form)
-		# now the instance is saved to the database
-		# So we are ready to add the many-to-many field which depends on other models
+		valid_data = super(ProductCreateView, self).form_valid(form)
 		form.instance.managers.add(user)
+		# add all default users
 		return valid_data
 
-	def get_success_url(self):
-		return reverse("products:list")
+	# def get_success_url(self):
+	# 	return reverse("products:list")
 
 
-
-# ProductManagerMixin takes care of LoginRequiredMixin	
 class ProductUpdateView(ProductManagerMixin, SubmitBtnMixin, MultiSlugMixin, UpdateView):
 	model = Product
 	template_name = "form.html"
 	form_class = ProductModelForm
-	#success_url ="/products/"
-	submit_btn = "Add Product"
-
+	#success_url = "/products/"
+	submit_btn = "Update Product"
 
 
 
@@ -60,41 +62,22 @@ class ProductDetailView(MultiSlugMixin, DetailView):
 class ProductDownloadView(MultiSlugMixin, DetailView):
 	model = Product
 
-	def get(self,request,*args,**kwargs):
-
-
+	def get(self, request, *args, **kwargs):
 		obj = self.get_object()
 		if obj in request.user.myproducts.products.all():
-
-			filepath = os.path.join(settings.PROTECTED_ROOT,obj.media.path)
-			# suitable for larger files	
+			filepath = os.path.join(settings.PROTECTED_ROOT, obj.media.path)
 			guessed_type = guess_type(filepath)[0]
-
-			print(guessed_type)
-
-			# The method open has to used in Python 3 and 
-			# should have the following encoding to prevent error
-			# it is good to put it in a try block 
-			wrapper = FileWrapper(open(filepath,"r", encoding='utf-8', errors='ignore'))
+			wrapper = FileWrapper(file(filepath))
 			mimetype = 'application/force-download'
-
 			if guessed_type:
 				mimetype = guessed_type
-			response = HttpResponse(wrapper, content_type = mimetype)
-
+			response = HttpResponse(wrapper, content_type=mimetype)
+			
 			if not request.GET.get("preview"):
 				response["Content-Disposition"] = "attachment; filename=%s" %(obj.media.name)
-
+			
 			response["X-SendFile"] = str(obj.media.name)
-			# Override the response with custom parameter before return statement
 			return response
-
-
-			'''
-			response = HttpResponse ( wrapper , content_type = 'application/force-download')
-			response["Content-Disposition"] = "attachment; filename=%s" % (obj.media.name)
-			response["X-SendFile"] = str(obj.media.name)
-			'''	
 		else:
 			raise Http404
 
@@ -103,30 +86,32 @@ class ProductDownloadView(MultiSlugMixin, DetailView):
 
 
 class ProductListView(ListView):
-	model = Product 
-	def get_queryset(self,*args,**kwargs):
-		qs = super(ProductListView,self).get_queryset(**kwargs)
-		query = self.request.GET.get("q","") # The second value is a default value for query and could be adjusted to any string
-		
+	model = Product
+
+	def get_queryset(self, *args, **kwargs):
+		qs = super(ProductListView, self).get_queryset(**kwargs)
+		query = self.request.GET.get("q")
 		if query:
 			qs = qs.filter(
-					Q(title__icontains = query) | 
-					Q (description__icontains=query)
-				).order_by("-pk")
+					Q(title__icontains=query)|
+					Q(description__icontains=query)
+				).order_by("title")
 		return qs
+
 
 
 
 def create_view(request): 
 	form = ProductModelForm(request.POST or None)
 	if form.is_valid():
+		print form.cleaned_data.get("publish")
 		instance = form.save(commit=False)
 		instance.sale_price = instance.price
 		instance.save()
 	template = "form.html"
 	context = {
 			"form": form,
-			"submit_btn": "Create Product",
+			"submit_btn": "Create Product"
 		}
 	return render(request, template, context)
 
@@ -148,14 +133,14 @@ def update_view(request, object_id=None):
 
 
 
-
 def detail_slug_view(request, slug=None):
 	product = Product.objects.get(slug=slug)
 	try:
 		product = get_object_or_404(Product, slug=slug)
 	except Product.MultipleObjectsReturned:
 		product = Product.objects.filter(slug=slug).order_by("-title").first()
-
+	# print slug
+	# product = 1
 	template = "detail_view.html"
 	context = {
 		"object": product
@@ -186,10 +171,14 @@ def detail_view(request, object_id=None):
 
 def list_view(request):
 	# list of items
-
+	print request
 	queryset = Product.objects.all()
 	template = "list_view.html"
 	context = {
 		"queryset": queryset
 	}
 	return render(request, template, context)
+
+
+
+

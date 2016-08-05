@@ -1,13 +1,13 @@
 from django.http import Http404
+
 from digitalmarket.mixins import LoginRequiredMixin
 
-
 class ProductManagerMixin(LoginRequiredMixin, object):
-	def get_object(self,*args,**kwargs):
+	def get_object(self, *args, **kwargs):
 		user = self.request.user
-		obj = super(ProductManagerMixin,self).get_object(*args,**kwargs)
+		obj = super(ProductManagerMixin, self).get_object(*args, **kwargs)
 		try:
-			obj.user == user
+			obj.user  == user
 		except:
 			raise Http404
 

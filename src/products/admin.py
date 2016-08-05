@@ -1,13 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Product,MyProducts,Thumbnail
+from .models import Product, MyProducts, Thumbnail
 
-
-class ThumbnailInline(admin.StackedInline):
-	model = Thumbnail
-
+class ThumbnailInline(admin.TabularInline):
 	extra = 1
+	model = Thumbnail
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -20,5 +18,8 @@ class ProductAdmin(admin.ModelAdmin):
 		model = Product
 
 
+
 admin.site.register(Product, ProductAdmin)
+
+
 admin.site.register(MyProducts)

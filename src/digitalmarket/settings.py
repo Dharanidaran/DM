@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2@scawtj97qc^z!k7ty%$092#)_%k!s+1^b3ouj0n%7ceq9=wi'
+SECRET_KEY = 'r5=z_n2l&)a_vhj(h+b_)0t0yaegu2uy+wk7i+zjy^e&uyesih'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -53,10 +53,11 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'digitalmarket.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,6 +83,20 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'digitalmarket',
+#         'USER': 'dmadmin',
+#         'PASSWORD': 'dmadmin123',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
+
+
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -103,18 +118,32 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-#Team Manages
-# This is where you will end up keeping images,javascipt,css related to the project
-STATICFILES_DIRS=(
-    os.path.join(BASE_DIR,"static"),
+#TEAM MANAGERS
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
 )
-#Collect files here , cdn
-STATIC_ROOT  = os.path.join( os.path.dirname(BASE_DIR) , "static_cdn", "staticfiles" )
 
 
-#Media root is the for the files uploaded from end users.
-MEDIA_ROOT  = os.path.join( os.path.dirname(BASE_DIR) , "static_cdn" , "media" )
+#TEAM DOESN'T
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "staticfiles") #'collect files here' #CDN / AWS S3 Bucket/ 
+
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "media")
+
+PROTECTED_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn", "protected")
 
 
-PROTECTED_ROOT = os.path.join(os.path.dirname(BASE_DIR),"static_cdn", "protected")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
