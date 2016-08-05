@@ -106,11 +106,13 @@ class ProductListView(ListView):
 	model = Product 
 	def get_queryset(self,*args,**kwargs):
 		qs = super(ProductListView,self).get_queryset(**kwargs)
-		query = self.request.GET.get("q","media") #media is a default value for query and could be adjusted to any string
-		qs = qs.filter(
-				Q(title__icontains = query) | 
-				Q (description__icontains=query)
-			).order_by("-pk")
+		query = self.request.GET.get("q","") # The second value is a default value for query and could be adjusted to any string
+		
+		if query:
+			qs = qs.filter(
+					Q(title__icontains = query) | 
+					Q (description__icontains=query)
+				).order_by("-pk")
 		return qs
 
 

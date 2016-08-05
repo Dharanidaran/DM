@@ -6,13 +6,20 @@
 <style>
 
 {% block style %}{% endblock style %}
+.main-content{
+	width:800px;
+	margin: 5em auto;
+}
 </style>
 </head>
 <body>
 
-{% block content %}
-<p>This is awesome</p>
-{% endblock content %}
+
+	<div class="main-content">
+		{% block content %}
+		<p>This is awesome</p>
+		{% endblock content %}
+	</div>
 </body>
 
 </html>

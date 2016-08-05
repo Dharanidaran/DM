@@ -9,14 +9,15 @@ from django.utils.text import slugify
 # Create your models here.
 
 def download_media_location(instance,filename):
-	return "%s/%s" % (instance.id,filename)
+	return "%s/%s" % (instance.slug,filename)
+
 
 
 class Product(models.Model):
 	#user = models.OneToOneField(settings.AUTH_USER_MODEL)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL,default="1")
-	managers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="managers_products", blank=True)
-	media =  models.FileField(blank=True,null=True,
+	managers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="managers_product", blank=True)
+	media =  models.ImageField(blank=True,null=True,
 		upload_to= download_media_location, 
 		storage =FileSystemStorage(location=settings.PROTECTED_ROOT))
 	title = models.CharField(max_length=30) #owiuerpoajsdlfkjasd;flkiu1p3o4u134123 ewjfa;sd
@@ -58,6 +59,94 @@ def product_pre_save_reciever(sender, instance, *args, **kwargs):
 		instance.slug = create_slug(instance)
 		
 pre_save.connect(product_pre_save_reciever, sender=Product)
+
+
+
+
+
+
+
+
+def thumbnail_location(instance,filename):
+	return "%s/%s" %(instance.product.slug, filename)
+
+
+THUMB_CHOICES = (
+	("hd", "HD"),
+	("sd", "SD"),
+	("micro", "Micro"),
+	)
+class Thumbnail(models.Model):
+	product = models.ForeignKey(Product)
+	# user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	type = models.CharField(max_length=20,choices = THUMB_CHOICES, default='hd')
+	height = models.CharField(max_length=20,null=True,blank=True)
+	width = models.CharField(max_length=20,null=True,blank=True)	
+	media = models.ImageField(
+		width_field="width",
+		height_field="height",
+		blank=True,
+		null=True,
+		upload_to = thumbnail_location,
+	)
+
+
+	def __str__(self):
+		return str(self.media.path)
+
+
+
+import os
+import shutil
+from PIL import Image
+import random
+
+from django.core.files import File
+
+def product_post_save_reciever(sender, instance, created ,*args, **kwargs):
+	# we want to create three different thubnail instances
+	if instance.media:
+
+		hd = Thumbnail.objects.get_or_create(product = instance,type= 'hd')[0]
+		sd = Thumbnail.objects.get_or_create(product = instance,type= 'sd')[0]
+		micro = Thumbnail.objects.get_or_create(product = instance,type= 'micro')[0]
+
+		hd_max=(400,400)
+		sd_max=(200,200)
+		micro_max=(50,50)
+
+		print (instance.media.path)
+		filename = os.path.basename(instance.media.path)
+
+		thumb = Image.open(instance.media.path)
+		thumb.thumbnail(hd_max,Image.ANTIALIAS)
+
+
+		temp_loc = "%s/%s/tmp" % (settings.MEDIA_ROOT, instance.slug)
+
+		if not os.path.exists(temp_loc):
+			os.makedirs(temp_loc)
+
+		temp_file_path = os.path.join(temp_loc, filename)
+
+		if os.path.exists(temp_file_path):
+			temp_file_path = os.path.join(temp_loc,"%s"% (random.random()))
+
+			os.makedirs(temp_path)
+			temp_file_path = os.path.join(temp_path , filename)
+
+		temp_image = open(temp_file_path,"w")
+		thumb.save(temp_image)
+
+		thumb_data = open(temp_file_path,"r")
+
+		thumb_file = File(thumb_data)
+		hd.media.save(filename,thumb_file)
+		shutil.rmtree(temp_loc, ignore_errors=True)
+
+
+
+post_save.connect(product_post_save_reciever, sender= Product)
 
 
 
