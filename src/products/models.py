@@ -129,20 +129,20 @@ def product_post_save_reciever(sender, instance, created ,*args, **kwargs):
 
 		temp_file_path = os.path.join(temp_loc, filename)
 
-		if os.path.exists(temp_file_path):
-			temp_file_path = os.path.join(temp_loc,"%s"% (random.random()))
+		# if os.path.exists(temp_file_path):
+		# 	temp_file_path = os.path.join(temp_loc,"%s"% (random.random()))
 
-			os.makedirs(temp_path)
-			temp_file_path = os.path.join(temp_path , filename)
+		# 	os.makedirs(temp_path)
+		# 	temp_file_path = os.path.join(temp_path , filename)
 
-		temp_image = open(temp_file_path,"w")
-		thumb.save(temp_image)
+		# temp_image = open(temp_file_path,"w")
+		# thumb.save(temp_image)
 
-		thumb_data = open(temp_file_path,"r")
+		# thumb_data = open(temp_file_path,"r")
 
-		thumb_file = File(thumb_data)
-		hd.media.save(filename,thumb_file)
-		shutil.rmtree(temp_loc, ignore_errors=True)
+		# thumb_file = File(thumb_data)
+		# hd.media.save(filename,thumb_file)
+		# shutil.rmtree(temp_loc, ignore_errors=True)
 
 
 

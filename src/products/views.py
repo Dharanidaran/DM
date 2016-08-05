@@ -38,7 +38,7 @@ class ProductCreateView( LoginRequiredMixin, SubmitBtnMixin, CreateView):
 		return valid_data
 
 	def get_success_url(self):
-		return reverse("product:list")
+		return reverse("products:list")
 
 
 
