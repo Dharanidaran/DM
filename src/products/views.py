@@ -1,4 +1,8 @@
 import os
+from mimetypes import guess_type
+from django.db.models import Q
+
+
 from django.conf import settings
 from django.core.servers.basehttp import FileWrapper
 
@@ -60,23 +64,39 @@ class ProductDownloadView(MultiSlugMixin, DetailView):
 
 
 		obj = self.get_object()
-		filepath = os.path.join(settings.PROTECTED_ROOT,obj.media.path)
-		# suitable for larger files
+		if obj in request.user.myproducts.products.all():
+
+			filepath = os.path.join(settings.PROTECTED_ROOT,obj.media.path)
+			# suitable for larger files	
+			guessed_type = guess_type(filepath)[0]
+
+			print(guessed_type)
+
+			# The method open has to used in Python 3 and 
+			# should have the following encoding to prevent error
+			# it is good to put it in a try block 
+			wrapper = FileWrapper(open(filepath,"r", encoding='utf-8', errors='ignore'))
+			mimetype = 'application/force-download'
+
+			if guessed_type:
+				mimetype = guessed_type
+			response = HttpResponse(wrapper, content_type = mimetype)
+
+			if not request.GET.get("preview"):
+				response["Content-Disposition"] = "attachment; filename=%s" %(obj.media.name)
+
+			response["X-SendFile"] = str(obj.media.name)
+			# Override the response with custom parameter before return statement
+			return response
 
 
-		# The method open has to used in Python 3 and 
-		# should have the following encoding to prevent error
-		# it is good to put it in a try block 
-		wrapper = FileWrapper(open(filepath,"r",encoding='utf-8', errors='ignore'))
-		response = HttpResponse ( wrapper , content_type = 'application/force-download')
-		response["Content-Disposition"] = "attachment; filename=%s" % (obj.media.name)
-		response["X-SendFile"] = str(obj.media.name)
-
-		# Override the response with custom parameter before return statement
-		return response
-
-
-
+			'''
+			response = HttpResponse ( wrapper , content_type = 'application/force-download')
+			response["Content-Disposition"] = "attachment; filename=%s" % (obj.media.name)
+			response["X-SendFile"] = str(obj.media.name)
+			'''	
+		else:
+			raise Http404
 
 
 
@@ -86,7 +106,11 @@ class ProductListView(ListView):
 	model = Product 
 	def get_queryset(self,*args,**kwargs):
 		qs = super(ProductListView,self).get_queryset(**kwargs)
-		qs =qs.filter(description__icontains='')
+		query = self.request.GET.get("q","media") #media is a default value for query and could be adjusted to any string
+		qs = qs.filter(
+				Q(title__icontains = query) | 
+				Q (description__icontains=query)
+			).order_by("-pk")
 		return qs
 
 

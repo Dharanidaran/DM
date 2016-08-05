@@ -28,6 +28,8 @@ class Product(models.Model):
 
 	def __unicode__(self): #def __unicode__(self):
 		return self.title
+	def __str__(self):
+		return self.title
 
 	def get_absolute_url(self):
 		view_name = "products:detail_slug"
@@ -58,10 +60,21 @@ def product_pre_save_reciever(sender, instance, *args, **kwargs):
 pre_save.connect(product_pre_save_reciever, sender=Product)
 
 
-# def product_post_save_receiver(sender,instance,*args,**kwargs):
-# 	if instance.slug != slugify(instance.title):
-# 		instance.slug = slugify(instance.title)
-# 		instance.save()
 
 
-# post_save.connect(product_post_save_receiver=)
+
+class MyProducts(models.Model):
+	user = models.OneToOneField(settings.AUTH_USER_MODEL)
+	products = models.ManyToManyField(Product, blank=True)
+
+	def __unicode__(self):
+		return "%s" % self.products.count()
+
+	def __str__(self):
+		return "%s" % self.products.count()
+
+	class Meta:
+		verbose_name = "My Products"
+		verbose_name_plural = "MyProducts"
+
+
