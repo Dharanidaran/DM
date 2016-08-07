@@ -92,6 +92,7 @@ import random
 from django.core.files import File
 
 def product_post_save_receiver(sender, instance, created, *args, **kwargs):
+	
 	if instance.media:
 		hd, hd_created = Thumbnail.objects.get_or_create(product=instance, type='hd')
 		sd, sd_created = Thumbnail.objects.get_or_create(product=instance, type='sd')
@@ -101,105 +102,115 @@ def product_post_save_receiver(sender, instance, created, *args, **kwargs):
 		sd_max = (200, 200)
 		micro_max = (50, 50)
 
-
-		print (instance.media.path)
-
-
-		filename = os.path.basename (instance.media.path)
+		if hd_created:
 
 
-		thumb = Image.open(instance.media.path)
-		thumb.thumbnail(hd_max)
-		
-
-		temp_loc = "%s/%s/tmp"%(settings.MEDIA_ROOT, instance.slug)
-
-		# make a tmp file for every unique slug if it doesnt exists
-
-		if not os.path.exists(temp_loc):
-			os.makedirs(temp_loc)
-
-		temp_file_path = os.path.join(temp_loc, filename)
-		thumb.save(temp_file_path)
-		thumb_data = open(temp_file_path,"rb")
-		thumb_file = File(thumb_data)
-		hd.media.save(filename,thumb_file)
+			filename = os.path.basename (instance.media.path)
 
 
+			thumb = Image.open(instance.media.path)
+			thumb.thumbnail(hd_max)
+			
 
+			temp_loc = "%s/%s/tmp"%(settings.MEDIA_ROOT, instance.slug)
+
+			# make a tmp file for every unique slug if it doesnt exists
+
+			if not os.path.exists(temp_loc):
+				os.makedirs(temp_loc)
+
+
+			temp_file_path = os.path.join(temp_loc,filename)
+			if os.path.exists(temp_file_path):
+				temp_path = os.path.join(temp_loc,"%s"%(random.random()))
+				os.makedirs(temp_path)
+
+				temp_file_path = os.path.join(temp_path,filename)
 
 
 
+			thumb.save(temp_file_path)
+
+			thumb_data = open(temp_file_path,"rb")
+			thumb_file = File(thumb_data)
+
+			hd.media.save(filename,thumb_file)
+
+		if sd_created:
+			
+
+			filename = os.path.basename (instance.media.path)
+
+
+			thumb = Image.open(instance.media.path)
+			thumb.thumbnail(sd_max)
+			
+
+			temp_loc = "%s/%s/tmp"%(settings.MEDIA_ROOT, instance.slug)
+
+			# make a tmp file for every unique slug if it doesnt exists
+
+			if not os.path.exists(temp_loc):
+				os.makedirs(temp_loc)
+
+
+			temp_file_path = os.path.join(temp_loc,filename)
+			if os.path.exists(temp_file_path):
+				temp_path = os.path.join(temp_loc,"%s"%(random.random()))
+				os.makedirs(temp_path)
+
+				temp_file_path = os.path.join(temp_path,filename)
 
 
 
+			thumb.save(temp_file_path)
+
+			thumb_data = open(temp_file_path,"rb")
+			thumb_file = File(thumb_data)
+
+			sd.media.save(filename,thumb_file)
+
+		if micro_created:
+			
+
+			filename = os.path.basename (instance.media.path)
 
 
-		# if hd_created:
-		# 	filename = os.path.basename(instance.media.path)
-		# 	thumb = Image.open(instance.media.path)
-		# 	thumb.thumbnail(hd_max, Image.ANTIALIAS)
-		# 	temp_loc = "%s/%s/tmp" %(settings.MEDIA_ROOT, instance.slug)
-		# 	if not os.path.exists(temp_loc):
-		# 		os.makedirs(temp_loc)
-		# 	temp_file_path = os.path.join(temp_loc, filename)
-		# 	if os.path.exists(temp_file_path):
-		# 		temp_path = os.path.join(temp_loc, "%s" %(random.random()))
-		# 		os.makedirs(temp_path)
-		# 		temp_file_path = os.path.join(temp_path, filename)
+			thumb = Image.open(instance.media.path)
+			thumb.thumbnail(micro_max)
+			
 
-		# 	temp_image = open(temp_file_path, "w")
-		# 	thumb.save(temp_image)
-		# 	thumb_data = open(temp_file_path, "r")
+			temp_loc = "%s/%s/tmp"%(settings.MEDIA_ROOT, instance.slug)
 
-		# 	thumb_file = File(thumb_data)
-		# 	hd.media.save(filename, thumb_file)
-		
-		# if sd_created:
-		# 	filename = os.path.basename(instance.media.path)
-		# 	thumb = Image.open(instance.media.path)
-		# 	thumb.thumbnail(sd_max, Image.ANTIALIAS)
-		# 	temp_loc = "%s/%s/tmp" %(settings.MEDIA_ROOT, instance.slug)
-		# 	if not os.path.exists(temp_loc):
-		# 		os.makedirs(temp_loc)
-		# 	temp_file_path = os.path.join(temp_loc, filename)
-		# 	if os.path.exists(temp_file_path):
-		# 		temp_path = os.path.join(temp_loc, "%s" %(random.random()))
-		# 		os.makedirs(temp_path)
-		# 		temp_file_path = os.path.join(temp_path, filename)
+			# make a tmp file for every unique slug if it doesnt exists
 
-		# 	temp_image = open(temp_file_path, "w")
-		# 	thumb.save(temp_image)
-		# 	thumb_data = open(temp_file_path, "r")
-
-		# 	thumb_file = File(thumb_data)
-		# 	sd.media.save(filename, thumb_file)
-
-		# if micro_created:
-		# 	filename = os.path.basename(instance.media.path)
-		# 	thumb = Image.open(instance.media.path)
-		# 	thumb.thumbnail(micro_max, Image.ANTIALIAS)
-		# 	temp_loc = "%s/%s/tmp" %(settings.MEDIA_ROOT, instance.slug)
-		# 	if not os.path.exists(temp_loc):
-		# 		os.makedirs(temp_loc)
-		# 	temp_file_path = os.path.join(temp_loc, filename)
-		# 	if os.path.exists(temp_file_path):
-		# 		temp_path = os.path.join(temp_loc, "%s" %(random.random()))
-		# 		os.makedirs(temp_path)
-		# 		temp_file_path = os.path.join(temp_path, filename)
-
-		# 	temp_image = open(temp_file_path, "w")
-		# 	thumb.save(temp_image)
-		# 	thumb_data = open(temp_file_path, "r")
-
-		# 	thumb_file = File(thumb_data)
-		# 	micro.media.save(filename, thumb_file)
+			if not os.path.exists(temp_loc):
+				os.makedirs(temp_loc)
 
 
-		#shutil.rmtree(temp_loc, ignore_errors=True)
+			temp_file_path = os.path.join(temp_loc,filename)
+			if os.path.exists(temp_file_path):
+				temp_path = os.path.join(temp_loc,"%s"%(random.random()))
+				os.makedirs(temp_path)
+
+				temp_file_path = os.path.join(temp_path,filename)
 
 
 
+			thumb.save(temp_file_path)
+
+			thumb_data = open(temp_file_path,"rb")
+			thumb_file = File(thumb_data)
+
+			micro.media.save(filename,thumb_file)
+
+
+
+		# temp_file_path = os.path.join(temp_loc, filename)
+		# thumb.save(temp_file_path)
+		# thumb_data = open(temp_file_path,"rb")
+		# thumb_file = File(thumb_data)
+		# hd.media.save(filename,thumb_file)
 
 
 post_save.connect(product_post_save_receiver, sender=Product)
