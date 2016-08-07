@@ -28,6 +28,9 @@ class Product(models.Model):
 	def __unicode__(self): #def __unicode__(self):
 		return self.title
 
+	def __str__(self):
+		return self.title
+
 	def get_absolute_url(self):
 		view_name = "products:detail_slug"
 		return reverse(view_name, kwargs={"slug": self.slug})
@@ -36,6 +39,12 @@ class Product(models.Model):
 		view_name = "products:download_slug"
 		url = reverse(view_name, kwargs={"slug": self.slug})
 		return url
+
+
+		'''
+		get thumbnails, instance.thumbnail_set.all()
+
+		'''
 
 
 
@@ -193,7 +202,8 @@ class MyProducts(models.Model):
 		return "%s" %(self.products.count())
 
 	def __str__(self):
-		return "%s" %(self.products.count() )
+		return "%s" %(self.products.count())
+
 
 	class Meta:
 		verbose_name = "My Products"
@@ -204,7 +214,7 @@ class MyProducts(models.Model):
 
 
 
-
+ 
 
 
 
