@@ -67,7 +67,7 @@ class ProductDownloadView(MultiSlugMixin, DetailView):
 		if obj in request.user.myproducts.products.all():
 			filepath = os.path.join(settings.PROTECTED_ROOT, obj.media.path)
 			guessed_type = guess_type(filepath)[0]
-			wrapper = FileWrapper(open(filepath,"r", encoding='utf-8', errors='ignore'))
+			wrapper = FileWrapper(open(filepath,"rb"))
 			mimetype = 'application/force-download'
 			if guessed_type:
 				mimetype = guessed_type
