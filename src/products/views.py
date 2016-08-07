@@ -67,7 +67,7 @@ class ProductDownloadView(MultiSlugMixin, DetailView):
 		if obj in request.user.myproducts.products.all():
 			filepath = os.path.join(settings.PROTECTED_ROOT, obj.media.path)
 			guessed_type = guess_type(filepath)[0]
-			wrapper = FileWrapper(file(filepath))
+			wrapper = FileWrapper(open(filepath,"r", encoding='utf-8', errors='ignore'))
 			mimetype = 'application/force-download'
 			if guessed_type:
 				mimetype = guessed_type
@@ -104,7 +104,7 @@ class ProductListView(ListView):
 def create_view(request): 
 	form = ProductModelForm(request.POST or None)
 	if form.is_valid():
-		print form.cleaned_data.get("publish")
+
 		instance = form.save(commit=False)
 		instance.sale_price = instance.price
 		instance.save()
@@ -139,8 +139,7 @@ def detail_slug_view(request, slug=None):
 		product = get_object_or_404(Product, slug=slug)
 	except Product.MultipleObjectsReturned:
 		product = Product.objects.filter(slug=slug).order_by("-title").first()
-	# print slug
-	# product = 1
+
 	template = "detail_view.html"
 	context = {
 		"object": product
@@ -170,8 +169,7 @@ def detail_view(request, object_id=None):
 
 
 def list_view(request):
-	# list of items
-	print request
+
 	queryset = Product.objects.all()
 	template = "list_view.html"
 	context = {
