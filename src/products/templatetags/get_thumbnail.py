@@ -6,10 +6,10 @@ register = template.Library()
 from ..models import Product, THUMB_CHOICES
 
 
-arg = arg.lower()
+
 @register.filter
 def get_thumbnail(obj,arg):
-
+	arg = arg.lower()
 	''' obj =  product instance '''
 
 	if not isinstance(obj, Product):

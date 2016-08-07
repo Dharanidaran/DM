@@ -46,6 +46,7 @@ class ProductAddForm(forms.Form):
 
 
 class ProductModelForm(forms.ModelForm):
+	tags = forms.CharField(label ='Tags',required=False)
 	publish = forms.ChoiceField(widget=forms.RadioSelect, choices=PUBLISH_CHOICES, required=False)
 	# description = forms.CharField(widget=forms.Textarea(
 	# 		attrs={

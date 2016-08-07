@@ -23,7 +23,7 @@ from digitalmarket.mixins import (
 from .forms import ProductAddForm, ProductModelForm
 from .mixins import ProductManagerMixin
 from .models import Product
-
+from tags.models import Tag
 
 
 
@@ -40,6 +40,15 @@ class ProductCreateView(LoginRequiredMixin, SubmitBtnMixin, CreateView):
 		valid_data = super(ProductCreateView, self).form_valid(form)
 		form.instance.managers.add(user)
 		# add all default users
+
+
+		tags = form.cleaned_data.get("tags")
+		if tags:
+			tags_list = tags.split(",")
+			for tag in tags_list:
+				if not tag == " ":
+					new_tag = Tag.objects.get_or_create(title = str(tag).strip())[0]
+					new_tag.products.add(form.instance)
 		return valid_data
 
 	# def get_success_url(self):
@@ -52,6 +61,33 @@ class ProductUpdateView(ProductManagerMixin, SubmitBtnMixin, MultiSlugMixin, Upd
 	form_class = ProductModelForm
 	#success_url = "/products/"
 	submit_btn = "Update Product"
+
+
+	def get_initial(self):
+		initial = super(ProductUpdateView,self).get_initial()
+		print (initial)
+		tags = self.get_object().tag_set.all()
+		initial["tags"] = ", ".join([x.title for x in tags])
+		"""
+		tag_list = []
+		for x in tags:
+			tag_list.append(x.title)
+		"""
+		return initial
+
+	def form_valid(self, form):
+		valid_data = super(ProductUpdateView, self).form_valid(form)
+		tags = form.cleaned_data.get("tags")
+		obj = self.get_object()
+		obj.tag_set.clear()
+
+		if tags:
+			tags_list = tags.split(",")
+			for tag in tags_list:
+				if tag: #check if not empty tag
+					new_tag = Tag.objects.get_or_create(title=str(tag).strip())[0]
+					new_tag.products.add(self.get_object())
+		return valid_data
 
 
 
