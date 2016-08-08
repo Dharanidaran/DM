@@ -40,7 +40,10 @@ INSTALLED_APPS = (
     'products',
     'tags',
     'analytics',
+    'dashboard',
+
 )
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

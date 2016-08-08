@@ -24,7 +24,7 @@ from .forms import ProductAddForm, ProductModelForm
 from .mixins import ProductManagerMixin
 from .models import Product
 from tags.models import Tag
-
+from analytics.models import TagView
 
 
 class ProductCreateView(LoginRequiredMixin, SubmitBtnMixin, CreateView):
@@ -93,6 +93,18 @@ class ProductUpdateView(ProductManagerMixin, SubmitBtnMixin, MultiSlugMixin, Upd
 
 class ProductDetailView(MultiSlugMixin, DetailView):
 	model = Product
+
+	def get_context_data(self,*args,**kwargs):
+		context = super(ProductDetailView,self).get_context_data(*args,**kwargs)
+		obj = self.get_object()
+		tags = obj.tag_set.all()
+
+		for tag in tags:
+			new_view = TagView.objects.add_count(self.request.user, tag)
+		return context
+
+
+
 
 
 class ProductDownloadView(MultiSlugMixin, DetailView):

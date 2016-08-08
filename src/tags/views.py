@@ -24,13 +24,13 @@ class TagDetailView(DetailView):
 		print (self.get_object().products.all()) #self.get_object() gets the instance of the object
 		
 		if self.request.user.is_authenticated():
-			analytic_obj, created = TagView.object.get_or_create(
+			analytic_obj, created = TagView.objects.get_or_create(
 					user = self.request.user,
 					tag = self.get_object()
 
 
 				)
-			
+
 			analytic_obj.count += 1
 			analytic_obj.save()
 
