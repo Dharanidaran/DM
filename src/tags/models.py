@@ -29,6 +29,7 @@ class TagManager(models.Manager):
 		return super(TagManager,self).all(*args,**kwargs).active()
 
 
+	
 
 class Tag(models.Model):
 	title = models.CharField(max_length=120, unique = True)

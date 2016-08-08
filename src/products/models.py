@@ -138,6 +138,11 @@ def product_post_save_receiver(sender, instance, created, *args, **kwargs):
 		micro_max = (50, 50)
 		media_path = instance.media.path
 		owner_slug = instance.slug
+
+
+		# Create associate three thumbnail object to one product.
+		# Simply create three thumbnail object and hook it to the 
+		# corresponding product or image in this case.
 		if hd_created:
 			create_new_thumb(media_path,hd,owner_slug,hd_max[0],hd_max[1])
 
