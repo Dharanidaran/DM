@@ -1,47 +1,67 @@
-{% extends  "base.html" %}
+{% extends "base.html" %}
+
+csrfmiddlewaretoken: "{{ csrf_token }}",
+
+success: function(data, textStatus, jqXHR){
+	console.log(data.works)
+	if (data.works) {
+		$("#content").html(data.time)
+	}
+	// console.log(textStatus)
+	// console.log(jqXHR)
+},
+error: function(jqXHR, textStatus, errorThrown){
+	// console.log(errorThrown)
+	// console.log(textStatus)
+	// alert(errorThrown)
+	if (jqXHR.status == 404) {
+		alert("Page not found!")
+	}
+	console.log(jqXHR.status)
+}
+
 <script>
 $(document).ready(function(){
 	{% block jquery %}
 	$("#test-call").click(function(event){
 		event.preventDefault();
-		$.ajax({ 
-
+		// $("#content").html("Hello there!")
+		var request = $.ajax({
 			method: "POST",
-			url : "{% url 'test' %}",
+			url: "/test/",
 			data: {
-				testData: "Say hello to Ajax data",
-				csrfmiddlewaretoken: "{{ csrf_token }}",
-			},
-			success: function(data, textStatus, jqXHR){
-				console.log(data)
-				if (data.works){
-					console.log("Inside")
-					$("#content").html("<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore cupiditate dolorum fugiat! Ad accusantium cum corrupti temporibus voluptatem ipsam omnis! ipsum </p> <br> "+data.time)
-				}
-			},
-
-			error: function(jqXHR, textStatus, errorThrown){
-				console.log(errorThrown)
-				console.log(textStatus)
-				console.log(jqXHR)
-
+				testData: "Hello new data",
+				
 			}
-
-
 		})
-
+		request.done(function(data){
+			if (data.works) {
+				$("#content").html(data.time)
+			}
+		})
+		request.fail(function(jqXHR, textStatus){
+			if (jqXHR.status == 404) {
+				alert("Page not found!")
+			} else if (jqXHR.status == 403) {
+				alert("You must be logged in to do this.")
+			} else {
+				alert("There was an error with your request. Please try again.")
+			}
+		})
 	})
 	{% endblock jquery %}
 })
 </script>
 
+
+
+
+
 {% block content %}
 
 
-<a id = "test-call" href="#"> Ajax </a>
+<a id='test-call' href='http://joincfe.com/'>Test Ajax</a>
 
-<div id="content">
+<div id='content'></div>
 
-</div>
 {% endblock %}
-
