@@ -1,0 +1,47 @@
+{% extends  "base.html" %}
+<script>
+$(document).ready(function(){
+	{% block jquery %}
+	$("#test-call").click(function(event){
+		event.preventDefault();
+		$.ajax({ 
+
+			method: "POST",
+			url : "{% url 'test' %}",
+			data: {
+				testData: "Say hello to Ajax data",
+				csrfmiddlewaretoken: "{{ csrf_token }}",
+			},
+			success: function(data, textStatus, jqXHR){
+				console.log(data)
+				if (data.works){
+					console.log("Inside")
+					$("#content").html("<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore cupiditate dolorum fugiat! Ad accusantium cum corrupti temporibus voluptatem ipsam omnis! ipsum </p> <br> "+data.time)
+				}
+			},
+
+			error: function(jqXHR, textStatus, errorThrown){
+				console.log(errorThrown)
+				console.log(textStatus)
+				console.log(jqXHR)
+
+			}
+
+
+		})
+
+	})
+	{% endblock jquery %}
+})
+</script>
+
+{% block content %}
+
+
+<a id = "test-call" href="#"> Ajax </a>
+
+<div id="content">
+
+</div>
+{% endblock %}
+
